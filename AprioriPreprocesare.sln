@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.28010.2041
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AprioriPreprocesare", "AprioriPreprocesare\AprioriPreprocesare.csproj", "{16C665DE-A15F-4457-9377-43146714EA47}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{16C665DE-A15F-4457-9377-43146714EA47}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{16C665DE-A15F-4457-9377-43146714EA47}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{16C665DE-A15F-4457-9377-43146714EA47}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{16C665DE-A15F-4457-9377-43146714EA47}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {86FB122C-9EF4-4185-9EA8-B150A19C211D}
+	EndGlobalSection
+EndGlobal
