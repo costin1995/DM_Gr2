@@ -4,7 +4,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{16C665DE-A15F-4457-9377-43146714EA47}</ProjectGuid>
+    <ProjectGuid>{89ACD3CF-3827-422B-991C-EC9F61A7B071}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <RootNamespace>AprioriPreprocesare</RootNamespace>
     <AssemblyName>AprioriPreprocesare</AssemblyName>
