@@ -25,9 +25,9 @@ namespace AprioriPreprocesare
         {
 
             string[,] matrice = new string[60, 60];
-            using (StreamReader reader = new StreamReader("C:\\Users\\Alina\\Desktop\\DMlab\\AprioriPreprocesare\\test_59_2.csv"))
+            using (StreamReader reader = new StreamReader(".//..//..//test_59_2.csv"))
             {
-
+                //"C:\Users\Alina\Desktop\DMlab\AprioriPreprocesare\test_59_2.csv"
                 string[] cols = new string[60];
                 int row = 0;
 
