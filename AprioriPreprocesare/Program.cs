@@ -13,10 +13,10 @@ namespace AprioriPreprocesare
         static void Main(string[] args)
         {
 
-
+            string[,] matrix;
             Program obj = new Program();
-
-            obj.MatrixToReturn();
+            matrix = obj.MatrixToReturn();
+            obj.ModifiedMatrix(matrix);
 
             Console.ReadKey();
         }
@@ -45,27 +45,51 @@ namespace AprioriPreprocesare
                 }
 
 
-               
+
                 for (int i = 0; i < 59; i++)
                 {
-                   
+
                     for (int j = 0; j < 59; j++)
                     {
-                        Console.Write(matrice[i, j] + "\t");
+                        //Console.Write(matrice[i, j] + "\t");
                     }
-                    
-                    Console.WriteLine();
-                    Console.WriteLine("-----------------------------------------------------------------------------------------");
-                    Console.WriteLine();
+
+                   // Console.WriteLine();
+                   // Console.WriteLine("-----------------------------------------------------------------------------------------");
+                   // Console.WriteLine();
 
                 }
 
-               
+
 
             }
             return matrice;
         }
+        public string[,] ModifiedMatrix(string[,] matrice)
+        {
+            string[,] MatrixToReturn = new string[matrice.GetLength(0) - 1, matrice.GetLength(1) - 1];
+            for (int i = 0; i < matrice.GetLength(0); i++)
+            {
+                for (int j = 0; j < matrice.GetLength(1); j++)
+                {
+                    if (matrice[i, j] == "?")
+                    {
+                        matrice[i, j] = "-";
+                    }
+                }
+            }
+            for (int i = 0; i < MatrixToReturn.GetLength(0); i++)
+            {
+                for (int j = 0; j < MatrixToReturn.GetLength(1); j++)
+                {
+                    MatrixToReturn[i, j] = matrice[i + 1, j + 1];
+                    Console.Write(MatrixToReturn[i, j]);
+                }
+                Console.WriteLine();
 
+            }
+            return MatrixToReturn;
 
+        }
     }
 }
