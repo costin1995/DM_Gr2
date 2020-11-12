@@ -4,9 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+
 namespace ExtragereaTrasaturilor
 {
-    class Article
+   
+
+    public class Article
     {
         public string title;
         public string text;
