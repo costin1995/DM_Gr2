@@ -10,6 +10,7 @@ using System.Windows.Forms;
 using System.Xml;
 using System.Xml.XPath;
 using System.IO;
+using System.Text.RegularExpressions;
 
 namespace ExtragereaTrasaturilor
 {
@@ -17,10 +18,15 @@ namespace ExtragereaTrasaturilor
     {
         XmlDocument document = new XmlDocument();
 
-        
+        List<string> VectorGlobal = new List<string>();
+        List<string> StopWords = new List<string>();
+        List<Dictionary<int, int>> ListVectorRar = new List<Dictionary<int, int>>();
         public Form1()
         {
             InitializeComponent();
+            //string Location = (@"E:\Facultate\Anul_4_sem_1\Data Mining\Laborator\Laborator\ExtragereaTrasaturilor\Reuters_34");
+            //CreateVectors(ListToReturn( Location));
+
         }
 
 
@@ -105,14 +111,143 @@ namespace ExtragereaTrasaturilor
 
         }
 
-
-
-        private void Form1_Load(object sender, EventArgs e)
+        static string TrimSuffix(string word)
         {
+            int apostropheLocation = word.IndexOf('\'');
+            if (apostropheLocation != -1)
+            {
+                word = word.Substring(0, apostropheLocation);
+            }
+
+            return word.ToLower();
+        }
+        static string[] GetWords(string input)
+        {
+            MatchCollection matches = Regex.Matches(input, @"\b[\w']*\b");
+
+            var words = from m in matches.Cast<Match>()
+                        where !string.IsNullOrEmpty(m.Value)
+                        select TrimSuffix(m.Value);
+
+            return words.ToArray();
+        }
+
+        public void ListaWords()
+        {
+            string[] lines = System.IO.File.ReadAllLines(@"E:\Facultate\Anul_4_sem_1\Data Mining\Laborator\Laborator\ExtragereaTrasaturilor\ExtragereaTrasaturilor\stopwords.txt");
+
+            foreach (string line in lines)
+            {
+                StopWords.Add(line);
+
+            }
+        }
+
+        public void CreateVectors(List<Article> ArticleList)
+        {
+            string[] text;
+            string[] title;
+            
+            ListaWords();
+           
+            foreach (var Article in ArticleList)
+            {
+                text = GetWords(Article.text);
+                title = GetWords(Article.title);
+                PopulareVectorGlobal(text);
+                PopulareVectorGlobal(title);
+            }
+
+            foreach (var Article in ArticleList)
+            {
+                text = GetWords(Article.text);
+                title = GetWords(Article.title);
+
+                ListVectorRar.Add(CreareVectorRar(title, text));
+            }   
+            
+        }
+
+        public Dictionary<string , int> VectorFregventa(string[] title, string[] text)
+        {
+            Dictionary<string, int> vectorFregventa = new Dictionary<string, int>();
+
+            PorterStemmer PorterStream = new PorterStemmer();
+            foreach (var word in text)
+            {
+                if (!StopWords.Contains(word))
+                {
+                    string root = string.Empty;
+                    root = PorterStream.StemWord(word);
+                   if (vectorFregventa.ContainsKey(root) == false)
+                    {
+                        vectorFregventa.Add(root,1);
+                    }
+                   else
+                    {
+                        vectorFregventa[root]++;
+                    }
+
+                }
+            }
+            foreach (var word in title)
+            {
+                if (!StopWords.Contains(word))
+                {
+                    string root = string.Empty;
+                    root = PorterStream.StemWord(word);
+                    if (vectorFregventa.ContainsKey(root) == false)
+                    {
+                        vectorFregventa.Add(root,1);
+                    }
+                    else
+                    {
+                        vectorFregventa[root]++;
+                    }
+
+                }
+            }
+            return vectorFregventa;
+        }
+
+        public Dictionary<int, int> CreareVectorRar(string[] title, string[] text)
+        {
+            Dictionary<string, int> vectorFregventa = VectorFregventa(title, text);
+            Dictionary<int, int> VectorRar = new Dictionary<int, int>();
+            foreach (var word in vectorFregventa)
+            {
+                for(int i=0;i<VectorGlobal.Count;i++)
+                {
+                    if(word.Key == VectorGlobal[i])
+                    {
+                        VectorRar.Add(i, word.Value);
+                        break;
+                    }
+                }
+               
+            }
+
+            return VectorRar;
 
         }
 
-        
+        public void PopulareVectorGlobal(string[] text)
+        { PorterStemmer PorterStream = new PorterStemmer();
+            foreach(var word in text)
+            { 
+                           
+                    if (!StopWords.Contains(word) )
+                    {
+                        string root = string.Empty;
+                        root = PorterStream.StemWord(word);
+                        if (!VectorGlobal.Contains(word))
+                        {
+                             VectorGlobal.Add(root);
+                        }
+                         
+                    }           
+            }
+        }
     }
 }
 
