@@ -21,6 +21,7 @@ namespace ExtragereaTrasaturilor
         List<string> VectorGlobal = new List<string>();
         List<string> StopWords = new List<string>();
         List<Dictionary<int, int>> ListVectorRar = new List<Dictionary<int, int>>();
+        List<Article> listToReturn = new List<Article>();
         public Form1()
         {
             InitializeComponent();
@@ -86,7 +87,6 @@ namespace ExtragereaTrasaturilor
         {
            
             XmlDocument xmldoc = new XmlDocument();
-            List<Article> listToReturn = new List<Article>();
             List<string> files = new List<string>();
 
             foreach (string f in Directory.GetFiles(LocationFile, "*.*", SearchOption.AllDirectories))
@@ -102,11 +102,11 @@ namespace ExtragereaTrasaturilor
                    
                     FileStream fs = new FileStream(file, FileMode.Open, FileAccess.Read);
                     xmldoc.Load(fs);
-                    listToReturn.Add(new Article(GetXmlNodeContentByName(xmldoc, "title"), GetXmlNodeContentByName(xmldoc, "text"), GetClassCodeFromXml(xmldoc)));
+                    string path = new DirectoryInfo(Path.GetDirectoryName(fs.Name)).Name;
+                    listToReturn.Add(new Article(GetXmlNodeContentByName(xmldoc, "title"), GetXmlNodeContentByName(xmldoc, "text"), GetClassCodeFromXml(xmldoc), path));
              
                 }
             }
-
             return listToReturn;
 
         }
@@ -134,7 +134,7 @@ namespace ExtragereaTrasaturilor
 
         public void ListaWords()
         {
-            string[] lines = System.IO.File.ReadAllLines(@"E:\Facultate\Anul_4_sem_1\Data Mining\Laborator\Laborator\ExtragereaTrasaturilor\ExtragereaTrasaturilor\stopwords.txt");
+            string[] lines = System.IO.File.ReadAllLines(@"..\..\stopwords.txt");
 
             foreach (string line in lines)
             {
@@ -236,19 +236,45 @@ namespace ExtragereaTrasaturilor
             foreach(var word in text)
             { 
                            
-                    if (!StopWords.Contains(word) )
+                if (!StopWords.Contains(word) )
+                {
+                    string root = string.Empty;
+                    root = PorterStream.StemWord(word);
+                    if (!VectorGlobal.Contains(word))
                     {
-                        string root = string.Empty;
-                        root = PorterStream.StemWord(word);
-                        if (!VectorGlobal.Contains(word))
-                        {
-                             VectorGlobal.Add(root);
-                        }
+                            VectorGlobal.Add(root);
+                    }
                          
-                    }           
+                }           
             }
+        }
+
+        private void btnExtTras_Click(object sender, EventArgs e)
+        {
+            ListToReturn("..\\..\\..\\Reuters_34");
+            CreateVectors(listToReturn);
+            string Filename = "..\\..\\..\\Input\\rezultat.txt";
+            StreamWriter sw = new StreamWriter(Filename);
+            foreach (var indexListVectorRar in ListVectorRar) {
+                foreach (var indexElementeLista in indexListVectorRar) 
+                {
+                    sw.Write("{0}:{1}",indexElementeLista.Key,indexElementeLista.Value+" ");
+                }
+                foreach (var indexListToReturn in listToReturn)
+                {
+                    if (listToReturn.IndexOf(indexListToReturn) == ListVectorRar.IndexOf(indexListVectorRar))
+                    {
+                        sw.Write(" # ");
+                        foreach (var indexElementeClassCodes in indexListToReturn.ClassCodes)
+                        {
+                            sw.Write(indexElementeClassCodes + " ");
+                        }
+                        sw.Write("# " + indexListToReturn.Data_Set + " ");
+                    }
+                }
+                sw.WriteLine("\r\n");
+            }
+            sw.Close();
         }
     }
 }
-
-

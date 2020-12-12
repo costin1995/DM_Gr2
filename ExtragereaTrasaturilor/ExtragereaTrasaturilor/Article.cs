@@ -13,14 +13,15 @@ namespace ExtragereaTrasaturilor
     {
         public string title;
         public string text;
-        List<string> ClassCodes = new List<string>();
+        public string Data_Set;
+        public List<string> ClassCodes = new List<string>();
 
-        public Article(string t, string tex, List<string> ClassWithCodes)
+        public Article(string t, string tex, List<string> ClassWithCodes,string data)
         {
             title = t;
             text = tex;
             ClassCodes = ClassWithCodes;
-
+            Data_Set = data;
         }
 
 
