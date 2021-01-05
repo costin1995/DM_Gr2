@@ -22,6 +22,8 @@ namespace ExtragereaTrasaturilor
         List<string> StopWords = new List<string>();
         List<Dictionary<int, int>> ListVectorRar = new List<Dictionary<int, int>>();
         List<Article> listToReturn = new List<Article>();
+        
+
         public Form1()
         {
             InitializeComponent();
@@ -83,7 +85,7 @@ namespace ExtragereaTrasaturilor
             return listCodes;
         }
 
-        public List<Article> ListToReturn(string LocationFile)
+        public List<Article> ListToReturn(string LocationFile)//citire fisier
         {
            
             XmlDocument xmldoc = new XmlDocument();
@@ -249,6 +251,22 @@ namespace ExtragereaTrasaturilor
             }
         }
 
+        public static double Entropie(Dictionary<string, int> aparitieClase, double totalEsantione)
+        {
+            double elemente = 0.0;
+            double entropie = 0;
+           
+
+            foreach (var item in aparitieClase)
+            {
+                elemente = item.Value / (double)totalEsantione;
+                entropie = entropie - elemente * (double)Math.Log(2, elemente);
+                
+            }
+            return entropie;
+        }
+
+ 
         private void btnExtTras_Click(object sender, EventArgs e)
         {
             ListToReturn("..\\..\\..\\Reuters_34");
