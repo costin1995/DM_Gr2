@@ -22,7 +22,7 @@ namespace ExtragereaTrasaturilor
         List<string> StopWords = new List<string>();
         List<Dictionary<int, int>> ListVectorRar = new List<Dictionary<int, int>>();
         List<Article> listToReturn = new List<Article>();
-        
+
 
         public Form1()
         {
@@ -87,7 +87,7 @@ namespace ExtragereaTrasaturilor
 
         public List<Article> ListToReturn(string LocationFile)//citire fisier
         {
-           
+
             XmlDocument xmldoc = new XmlDocument();
             List<string> files = new List<string>();
 
@@ -101,12 +101,12 @@ namespace ExtragereaTrasaturilor
             {
                 if (file.Contains(".XML"))
                 {
-                   
+
                     FileStream fs = new FileStream(file, FileMode.Open, FileAccess.Read);
                     xmldoc.Load(fs);
                     string path = new DirectoryInfo(Path.GetDirectoryName(fs.Name)).Name;
                     listToReturn.Add(new Article(GetXmlNodeContentByName(xmldoc, "title"), GetXmlNodeContentByName(xmldoc, "text"), GetClassCodeFromXml(xmldoc), path));
-             
+
                 }
             }
             return listToReturn;
@@ -149,9 +149,9 @@ namespace ExtragereaTrasaturilor
         {
             string[] text;
             string[] title;
-            
+
             ListaWords();
-           
+
             foreach (var Article in ArticleList)
             {
                 text = GetWords(Article.text);
@@ -166,11 +166,11 @@ namespace ExtragereaTrasaturilor
                 title = GetWords(Article.title);
 
                 ListVectorRar.Add(CreareVectorRar(title, text));
-            }   
-            
+            }
+
         }
 
-        public Dictionary<string , int> VectorFregventa(string[] title, string[] text)
+        public Dictionary<string, int> VectorFregventa(string[] title, string[] text)
         {
             Dictionary<string, int> vectorFregventa = new Dictionary<string, int>();
 
@@ -181,11 +181,11 @@ namespace ExtragereaTrasaturilor
                 {
                     string root = string.Empty;
                     root = PorterStream.StemWord(word);
-                   if (vectorFregventa.ContainsKey(root) == false)
+                    if (vectorFregventa.ContainsKey(root) == false)
                     {
-                        vectorFregventa.Add(root,1);
+                        vectorFregventa.Add(root, 1);
                     }
-                   else
+                    else
                     {
                         vectorFregventa[root]++;
                     }
@@ -200,7 +200,7 @@ namespace ExtragereaTrasaturilor
                     root = PorterStream.StemWord(word);
                     if (vectorFregventa.ContainsKey(root) == false)
                     {
-                        vectorFregventa.Add(root,1);
+                        vectorFregventa.Add(root, 1);
                     }
                     else
                     {
@@ -218,15 +218,15 @@ namespace ExtragereaTrasaturilor
             Dictionary<int, int> VectorRar = new Dictionary<int, int>();
             foreach (var word in vectorFregventa)
             {
-                for(int i=0;i<VectorGlobal.Count;i++)
+                for (int i = 0; i < VectorGlobal.Count; i++)
                 {
-                    if(word.Key == VectorGlobal[i])
+                    if (word.Key == VectorGlobal[i])
                     {
                         VectorRar.Add(i, word.Value);
                         break;
                     }
                 }
-               
+
             }
 
             return VectorRar;
@@ -234,20 +234,21 @@ namespace ExtragereaTrasaturilor
         }
 
         public void PopulareVectorGlobal(string[] text)
-        { PorterStemmer PorterStream = new PorterStemmer();
-            foreach(var word in text)
-            { 
-                           
-                if (!StopWords.Contains(word) )
+        {
+            PorterStemmer PorterStream = new PorterStemmer();
+            foreach (var word in text)
+            {
+
+                if (!StopWords.Contains(word))
                 {
                     string root = string.Empty;
                     root = PorterStream.StemWord(word);
                     if (!VectorGlobal.Contains(word))
                     {
-                            VectorGlobal.Add(root);
+                        VectorGlobal.Add(root);
                     }
-                         
-                }           
+
+                }
             }
         }
 
@@ -255,28 +256,50 @@ namespace ExtragereaTrasaturilor
         {
             double elemente = 0.0;
             double entropie = 0;
-           
+
 
             foreach (var item in aparitieClase)
             {
                 elemente = item.Value / (double)totalEsantione;
                 entropie = entropie - elemente * (double)Math.Log(2, elemente);
-                
+
             }
             return entropie;
         }
 
- 
+        public static double EntropieGlobala(List<Article> articole)
+        {
+            double entropieGlobala = 0;
+            Dictionary<string, int> repartitieClase = new Dictionary<string, int>();
+            foreach (Article articol in articole)
+            {
+                foreach (string clasa in articol.ClassCodes)
+                {
+                    if (!repartitieClase.ContainsKey(clasa))
+                    {
+                        repartitieClase.Add(clasa, 1);
+                    }
+                    else
+                    {
+                        repartitieClase[clasa]++;
+                    }
+                }
+            }
+            entropieGlobala = Entropie(repartitieClase, articole.Count);
+            return entropieGlobala;
+        }
+
         private void btnExtTras_Click(object sender, EventArgs e)
         {
             ListToReturn("..\\..\\..\\Reuters_34");
             CreateVectors(listToReturn);
             string Filename = "..\\..\\..\\Input\\rezultat.txt";
             StreamWriter sw = new StreamWriter(Filename);
-            foreach (var indexListVectorRar in ListVectorRar) {
-                foreach (var indexElementeLista in indexListVectorRar) 
+            foreach (var indexListVectorRar in ListVectorRar)
+            {
+                foreach (var indexElementeLista in indexListVectorRar)
                 {
-                    sw.Write("{0}:{1}",indexElementeLista.Key,indexElementeLista.Value+" ");
+                    sw.Write("{0}:{1}", indexElementeLista.Key, indexElementeLista.Value + " ");
                 }
                 foreach (var indexListToReturn in listToReturn)
                 {
