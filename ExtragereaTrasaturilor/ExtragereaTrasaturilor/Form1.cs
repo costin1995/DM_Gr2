@@ -22,8 +22,8 @@ namespace ExtragereaTrasaturilor
         List<string> StopWords = new List<string>();
         List<Dictionary<int, int>> ListVectorRar = new List<Dictionary<int, int>>();
         List<Article> listToReturn = new List<Article>();
-
-
+        Dictionary<string, int> EntropiaCuvantExistent = new Dictionary<string, int>();
+        double rezEntropieCuvantExistent = 0.0;
         public Form1()
         {
             InitializeComponent();
@@ -287,6 +287,40 @@ namespace ExtragereaTrasaturilor
             }
             entropieGlobala = Entropie(repartitieClase, articole.Count);
             return entropieGlobala;
+        }
+
+        public double EntropieCuvantExistent(List<Article> listaArticole, int NrCuvant/*numarul corespunzator cuvantului pentru care se calculeaza entropia*/)
+        {
+            int nrArticoleNrCuvant=0;
+            foreach (var a in ListVectorRar)
+            {
+                foreach(var b in a)
+                {
+                    if (b.Key == NrCuvant)
+                    {
+                        nrArticoleNrCuvant++;
+                        foreach (var c in listaArticole)
+                        {
+                            if (listaArticole.IndexOf(c) == ListVectorRar.IndexOf(a))
+                            {
+                                foreach (var d in c.ClassCodes)
+                                {
+                                    if (!EntropiaCuvantExistent.ContainsKey(d))
+                                    {
+                                        EntropiaCuvantExistent.Add(d, 1);
+                                    }
+                                    else
+                                    {
+                                        EntropiaCuvantExistent[d]++;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            rezEntropieCuvantExistent = Entropie(EntropiaCuvantExistent, nrArticoleNrCuvant);
+            return rezEntropieCuvantExistent;
         }
 
         private void btnExtTras_Click(object sender, EventArgs e)
