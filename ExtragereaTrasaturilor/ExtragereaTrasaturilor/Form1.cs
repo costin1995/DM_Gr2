@@ -24,6 +24,8 @@ namespace ExtragereaTrasaturilor
         List<Article> listToReturn = new List<Article>();
         Dictionary<string, int> EntropiaCuvantExistent = new Dictionary<string, int>();
         double rezEntropieCuvantExistent = 0.0;
+        Dictionary<string, int> EntropiaCuvantCareNuExista = new Dictionary<string, int>();
+        double rezEntropieCuvantCareNuExista = 0.0;
         public Form1()
         {
             InitializeComponent();
@@ -321,6 +323,45 @@ namespace ExtragereaTrasaturilor
             }
             rezEntropieCuvantExistent = Entropie(EntropiaCuvantExistent, nrArticoleNrCuvant);
             return rezEntropieCuvantExistent;
+        }
+        public double EntropieCuvantCareNuExista(List<Article> listaArticole, int NrCuvant)
+        {
+            int nrArticoleNrCuvant = 0;
+            foreach (var VectorRar in ListVectorRar)
+            {
+                bool ok = true;
+                foreach (var b in VectorRar)
+                {
+                    if (b.Key == NrCuvant)
+                    {
+                        ok = false;
+                    }
+                }
+                        if(ok==true)
+                        { 
+                            nrArticoleNrCuvant++;
+                            foreach (var c in listaArticole)
+                            {
+                                if (listaArticole.IndexOf(c) == ListVectorRar.IndexOf(VectorRar))
+                                {
+                                    foreach (var d in c.ClassCodes)
+                                    {
+                                        if (!EntropiaCuvantCareNuExista.ContainsKey(d))
+                                        {
+                                            EntropiaCuvantCareNuExista.Add(d, 1);
+                                        }
+                                        else
+                                        {
+                                            EntropiaCuvantCareNuExista[d]++;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                
+            }
+            rezEntropieCuvantCareNuExista = Entropie(EntropiaCuvantCareNuExista, nrArticoleNrCuvant);
+            return rezEntropieCuvantCareNuExista;
         }
 
         private void btnExtTras_Click(object sender, EventArgs e)
