@@ -26,6 +26,13 @@ namespace ExtragereaTrasaturilor
         double rezEntropieCuvantExistent = 0.0;
         Dictionary<string, int> EntropiaCuvantCareNuExista = new Dictionary<string, int>();
         double rezEntropieCuvantCareNuExista = 0.0;
+       
+        public static int totalEsantione;
+        List<string> CstInformational = new List<string>();
+        public static double entropieGlobala;
+        int nrArticoleNrCuvant;
+        int nrArticoleNrCuvantNeexistent;
+
         public Form1()
         {
             InitializeComponent();
@@ -84,7 +91,9 @@ namespace ExtragereaTrasaturilor
                 }
             }
 
+            totalEsantione = listCodes.Count;
             return listCodes;
+            
         }
 
         public List<Article> ListToReturn(string LocationFile)//citire fisier
@@ -266,12 +275,13 @@ namespace ExtragereaTrasaturilor
                 entropie = entropie - elemente * (double)Math.Log(2, elemente);
 
             }
+          
             return entropie;
         }
 
         public static double EntropieGlobala(List<Article> articole)
         {
-            double entropieGlobala = 0;
+            entropieGlobala = 0;
             Dictionary<string, int> repartitieClase = new Dictionary<string, int>();
             foreach (Article articol in articole)
             {
@@ -293,7 +303,7 @@ namespace ExtragereaTrasaturilor
 
         public double EntropieCuvantExistent(List<Article> listaArticole, int NrCuvant/*numarul corespunzator cuvantului pentru care se calculeaza entropia*/)
         {
-            int nrArticoleNrCuvant=0;
+            nrArticoleNrCuvant=0;
             foreach (var a in ListVectorRar)
             {
                 foreach(var b in a)
@@ -326,7 +336,7 @@ namespace ExtragereaTrasaturilor
         }
         public double EntropieCuvantCareNuExista(List<Article> listaArticole, int NrCuvant)
         {
-            int nrArticoleNrCuvant = 0;
+            nrArticoleNrCuvantNeexistent = 0;
             foreach (var VectorRar in ListVectorRar)
             {
                 bool ok = true;
@@ -338,8 +348,8 @@ namespace ExtragereaTrasaturilor
                     }
                 }
                         if(ok==true)
-                        { 
-                            nrArticoleNrCuvant++;
+                        {
+                            nrArticoleNrCuvantNeexistent++;
                             foreach (var c in listaArticole)
                             {
                                 if (listaArticole.IndexOf(c) == ListVectorRar.IndexOf(VectorRar))
@@ -360,9 +370,28 @@ namespace ExtragereaTrasaturilor
                         }
                 
             }
-            rezEntropieCuvantCareNuExista = Entropie(EntropiaCuvantCareNuExista, nrArticoleNrCuvant);
+            rezEntropieCuvantCareNuExista = Entropie(EntropiaCuvantCareNuExista, nrArticoleNrCuvantNeexistent);
             return rezEntropieCuvantCareNuExista;
         }
+
+
+        public void CastigInformational(List<double> CastInformational)
+        {
+            double castigInformational = entropieGlobala - (nrArticoleNrCuvantNeexistent / totalEsantione) * rezEntropieCuvantCareNuExista - (nrArticoleNrCuvant / totalEsantione) * rezEntropieCuvantExistent;
+            CastInformational.Add(castigInformational);
+
+            foreach (var index in VectorGlobal)
+            {  
+                foreach (var item in CastInformational)
+                {
+                        Console.Write(item + "\n");
+                }
+            }
+            Console.Write("\n");
+
+        }
+
+
 
         private void btnExtTras_Click(object sender, EventArgs e)
         {
