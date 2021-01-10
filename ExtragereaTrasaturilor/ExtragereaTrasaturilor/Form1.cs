@@ -275,7 +275,6 @@ namespace ExtragereaTrasaturilor
                 entropie = entropie - elemente * (double)Math.Log(2, elemente);
 
             }
-          
             return entropie;
         }
 
