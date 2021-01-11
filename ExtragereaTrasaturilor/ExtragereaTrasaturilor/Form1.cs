@@ -393,7 +393,17 @@ namespace ExtragereaTrasaturilor
 
         }
 
-
+        public double DistantaEuclidiana(Dictionary<int, int> VectorRar1, Dictionary<int, int> VectorRar2, int n/*numarul de trasaturi caracteristice*/)
+        {
+            double rezDE;
+            double sumaelem = 0.0;
+            for(int i = 0; i < n; i++)
+            {
+                sumaelem += Math.Pow(VectorRar1.ElementAt(i).Key - VectorRar2.ElementAt(i).Key, 2);
+            }
+            rezDE = Math.Sqrt(sumaelem);
+            return rezDE;
+        }
 
 
 
