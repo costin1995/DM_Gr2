@@ -18,6 +18,7 @@ namespace ExtragereaTrasaturilor
     {
         XmlDocument document = new XmlDocument();
 
+        List<int> indexCuvSubPrag = new List<int>();
         List<string> VectorGlobal = new List<string>();
         List<string> StopWords = new List<string>();
         List<Dictionary<int, int>> ListVectorRar = new List<Dictionary<int, int>>();
@@ -26,9 +27,9 @@ namespace ExtragereaTrasaturilor
         double rezEntropieCuvantExistent = 0.0;
         Dictionary<string, int> EntropiaCuvantCareNuExista = new Dictionary<string, int>();
         double rezEntropieCuvantCareNuExista = 0.0;
-       
+
         public static int totalEsantione;
-        List<string> CstInformational = new List<string>();
+        List<double> CstInformational = new List<double>();
         public static double entropieGlobala;
         int nrArticoleNrCuvant;
         int nrArticoleNrCuvantNeexistent;
@@ -93,7 +94,7 @@ namespace ExtragereaTrasaturilor
 
             totalEsantione = listCodes.Count;
             return listCodes;
-            
+
         }
 
         public List<Article> ListToReturn(string LocationFile)//citire fisier
@@ -302,10 +303,10 @@ namespace ExtragereaTrasaturilor
 
         public double EntropieCuvantExistent(List<Article> listaArticole, int NrCuvant/*numarul corespunzator cuvantului pentru care se calculeaza entropia*/)
         {
-            nrArticoleNrCuvant=0;
+            nrArticoleNrCuvant = 0;
             foreach (var a in ListVectorRar)
             {
-                foreach(var b in a)
+                foreach (var b in a)
                 {
                     if (b.Key == NrCuvant)
                     {
@@ -346,28 +347,28 @@ namespace ExtragereaTrasaturilor
                         ok = false;
                     }
                 }
-                        if(ok==true)
+                if (ok == true)
+                {
+                    nrArticoleNrCuvantNeexistent++;
+                    foreach (var c in listaArticole)
+                    {
+                        if (listaArticole.IndexOf(c) == ListVectorRar.IndexOf(VectorRar))
                         {
-                            nrArticoleNrCuvantNeexistent++;
-                            foreach (var c in listaArticole)
+                            foreach (var d in c.ClassCodes)
                             {
-                                if (listaArticole.IndexOf(c) == ListVectorRar.IndexOf(VectorRar))
+                                if (!EntropiaCuvantCareNuExista.ContainsKey(d))
                                 {
-                                    foreach (var d in c.ClassCodes)
-                                    {
-                                        if (!EntropiaCuvantCareNuExista.ContainsKey(d))
-                                        {
-                                            EntropiaCuvantCareNuExista.Add(d, 1);
-                                        }
-                                        else
-                                        {
-                                            EntropiaCuvantCareNuExista[d]++;
-                                        }
-                                    }
+                                    EntropiaCuvantCareNuExista.Add(d, 1);
+                                }
+                                else
+                                {
+                                    EntropiaCuvantCareNuExista[d]++;
                                 }
                             }
                         }
-                
+                    }
+                }
+
             }
             rezEntropieCuvantCareNuExista = Entropie(EntropiaCuvantCareNuExista, nrArticoleNrCuvantNeexistent);
             return rezEntropieCuvantCareNuExista;
@@ -380,15 +381,19 @@ namespace ExtragereaTrasaturilor
             CastInformational.Add(castigInformational);
 
             foreach (var index in VectorGlobal)
-            {  
+            {
                 foreach (var item in CastInformational)
                 {
-                        Console.Write(item + "\n");
+                    Console.Write(item + "\n");
                 }
             }
             Console.Write("\n");
 
+
+
         }
+
+
 
 
 
@@ -419,6 +424,78 @@ namespace ExtragereaTrasaturilor
                 sw.WriteLine("\r\n");
             }
             sw.Close();
+        }
+
+        private static void AddText(FileStream fs, string value)
+        {
+            byte[] info = new UTF8Encoding(true).GetBytes(value);
+            fs.Write(info, 0, info.Length);
+        }
+
+        private void selectieTrasaturiBtn_Click(object sender, EventArgs e)
+        {
+            float prag = (float)pragForm.Value;
+            for (int i = 0; i < CstInformational.Count; i++)
+            {
+                if (CstInformational.ElementAt(i) < 0.5)
+                {
+                    indexCuvSubPrag.Add(i);
+                   
+                }
+            }
+            for (int i = 0; i < indexCuvSubPrag.Count; i++)
+            {
+                CstInformational.RemoveAt(indexCuvSubPrag[i]);
+                VectorGlobal.RemoveAt(indexCuvSubPrag[i]);
+            }
+
+            foreach (var vectorRar in ListVectorRar)
+            {
+
+                for (int i = 0; i < indexCuvSubPrag.Count; i++)
+                {
+                    if (vectorRar.ContainsKey(indexCuvSubPrag[i]))
+                    {
+                        vectorRar.Remove(indexCuvSubPrag[i]);
+                    }
+
+                }
+            }
+
+            string path = @"..\..\..\SelectiaTrasaturilor.txt"; // path to file
+            using (FileStream fs = File.Create(path))
+            {
+
+                for (int i = 0; i < VectorGlobal.Count; i++)
+                {
+                    string scrie = "@attribute " + VectorGlobal[i] + " " + CstInformational[i] + "\r\n";
+                    AddText(fs, scrie);
+                }
+                AddText(fs, "\r\n@data\r\n");
+
+                int j = 0;
+                foreach (Dictionary<int, int> dict in ListVectorRar)
+                {
+                    foreach (var value in dict)
+                    {
+                        AddText(fs, value.Key + ":" + value.Value + " ");
+                    }
+                    AddText(fs, "# ");
+                    AddText(fs, listToReturn.ElementAt(j).ClassCodes.First());
+                    AddText(fs, "\r\n");
+                    j++;
+                }
+
+            }
+
+
+
+
+        }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+
         }
     }
 }
