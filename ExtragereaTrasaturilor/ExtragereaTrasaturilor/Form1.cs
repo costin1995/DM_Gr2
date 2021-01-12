@@ -31,8 +31,7 @@ namespace ExtragereaTrasaturilor
         public static int totalEsantione;
         List<double> CstInformational = new List<double>();
         public static double entropieGlobala;
-        int nrArticoleNrCuvant;
-        int nrArticoleNrCuvantNeexistent;
+        
 
         public Form1()
         {
@@ -303,7 +302,7 @@ namespace ExtragereaTrasaturilor
 
         public double EntropieCuvantExistent(List<Article> listaArticole, int NrCuvant/*numarul corespunzator cuvantului pentru care se calculeaza entropia*/)
         {
-            nrArticoleNrCuvant = 0;
+            int nrArticoleNrCuvant = 0;
             foreach (var a in ListVectorRar)
             {
                 foreach (var b in a)
@@ -336,7 +335,7 @@ namespace ExtragereaTrasaturilor
         }
         public double EntropieCuvantCareNuExista(List<Article> listaArticole, int NrCuvant)
         {
-            nrArticoleNrCuvantNeexistent = 0;
+            int nrArticoleNrCuvant= 0;
             foreach (var VectorRar in ListVectorRar)
             {
                 bool ok = true;
@@ -349,7 +348,7 @@ namespace ExtragereaTrasaturilor
                 }
                 if (ok == true)
                 {
-                    nrArticoleNrCuvantNeexistent++;
+                    nrArticoleNrCuvant++;
                     foreach (var c in listaArticole)
                     {
                         if (listaArticole.IndexOf(c) == ListVectorRar.IndexOf(VectorRar))
@@ -370,25 +369,23 @@ namespace ExtragereaTrasaturilor
                 }
 
             }
-            rezEntropieCuvantCareNuExista = Entropie(EntropiaCuvantCareNuExista, nrArticoleNrCuvantNeexistent);
+            rezEntropieCuvantCareNuExista = Entropie(EntropiaCuvantCareNuExista, nrArticoleNrCuvant);
             return rezEntropieCuvantCareNuExista;
         }
 
 
-        public void CastigInformational(List<double> CastInformational)
+        public void CastigInformational()
         {
-            double castigInformational = entropieGlobala - (nrArticoleNrCuvantNeexistent / totalEsantione) * rezEntropieCuvantCareNuExista - (nrArticoleNrCuvant / totalEsantione) * rezEntropieCuvantExistent;
-            CastInformational.Add(castigInformational);
+            double castigInform = 0.0;
+            int totalValori = listToReturn.Count;
 
-            foreach (var index in VectorGlobal)
+            for (int i = 0; i < VectorGlobal.Count; i++)
             {
-                foreach (var item in CastInformational)
-                {
-                    Console.Write(item + "\n");
-                }
+                int aparitieValoare = EntropiaCuvantExistent[VectorGlobal.ElementAt(i)];
+                castigInform = EntropieGlobala(listToReturn) - (aparitieValoare / totalValori) * EntropieCuvantExistent(listToReturn, aparitieValoare) - (aparitieValoare / totalValori) * EntropieCuvantCareNuExista(listToReturn, aparitieValoare);
+                CstInformational.Add(castigInform);
+                
             }
-            Console.Write("\n");
-
 
 
         }
@@ -405,7 +402,7 @@ namespace ExtragereaTrasaturilor
             return rezDE;
         }
 
-
+        
 
         private void btnExtTras_Click(object sender, EventArgs e)
         {
