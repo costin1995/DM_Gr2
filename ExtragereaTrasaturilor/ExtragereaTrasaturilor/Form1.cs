@@ -424,6 +424,20 @@ namespace ExtragereaTrasaturilor
         }
 
 
+        public Dictionary<int, float> NormalizareNominala(Dictionary<int, int> vectorRar)
+        {
+            float maxValueDict = vectorRar.Values.Max();
+            Dictionary<int, float> vectorRarNormalizat = new Dictionary<int, float>();
+            foreach (var value in vectorRar)
+            {
+                vectorRarNormalizat.Add(value.Key, value.Value / maxValueDict);
+            }
+
+            return vectorRarNormalizat;
+
+        }
+
+
 
         private void btnExtTras_Click(object sender, EventArgs e)
         {
