@@ -31,7 +31,7 @@ namespace ExtragereaTrasaturilor
         public static int totalEsantione;
         List<double> CstInformational = new List<double>();
         public static double entropieGlobala;
-        
+
 
         public Form1()
         {
@@ -284,17 +284,16 @@ namespace ExtragereaTrasaturilor
             Dictionary<string, int> repartitieClase = new Dictionary<string, int>();
             foreach (Article articol in articole)
             {
-                foreach (string clasa in articol.ClassCodes)
+
+                if (!repartitieClase.ContainsKey(articol.ClassCodes.First()))
                 {
-                    if (!repartitieClase.ContainsKey(clasa))
-                    {
-                        repartitieClase.Add(clasa, 1);
-                    }
-                    else
-                    {
-                        repartitieClase[clasa]++;
-                    }
+                    repartitieClase.Add(articol.ClassCodes.First(), 1);
                 }
+                else
+                {
+                    repartitieClase[articol.ClassCodes.First()]++;
+                }
+
             }
             entropieGlobala = Entropie(repartitieClase, articole.Count);
             return entropieGlobala;
@@ -335,7 +334,7 @@ namespace ExtragereaTrasaturilor
         }
         public double EntropieCuvantCareNuExista(List<Article> listaArticole, int NrCuvant)
         {
-            int nrArticoleNrCuvant= 0;
+            int nrArticoleNrCuvant = 0;
             foreach (var VectorRar in ListVectorRar)
             {
                 bool ok = true;
@@ -384,7 +383,7 @@ namespace ExtragereaTrasaturilor
                 int aparitieValoare = EntropiaCuvantExistent[VectorGlobal.ElementAt(i)];
                 castigInform = EntropieGlobala(listToReturn) - (aparitieValoare / totalValori) * EntropieCuvantExistent(listToReturn, aparitieValoare) - (aparitieValoare / totalValori) * EntropieCuvantCareNuExista(listToReturn, aparitieValoare);
                 CstInformational.Add(castigInform);
-                
+
             }
 
 
@@ -394,7 +393,7 @@ namespace ExtragereaTrasaturilor
         {
             double rezDE;
             double sumaelem = 0.0;
-            for(int i = 0; i < n; i++)
+            for (int i = 0; i < n; i++)
             {
                 sumaelem += Math.Pow(VectorRar1.ElementAt(i).Key - VectorRar2.ElementAt(i).Key, 2);
             }
@@ -407,14 +406,14 @@ namespace ExtragereaTrasaturilor
             double sumaelem = 0.0;
             for (int i = 0; i < n; i++)
             {
-               
+
                 sumaelem += Math.Abs(VectorRar1.ElementAt(i).Key - VectorRar2.ElementAt(i).Key);
             }
             rezDM = sumaelem;
             return rezDM;
         }
 
-        public Dictionary<int, double> NormalizareCornellSmart(Dictionary<int, int> VectorRar )
+        public Dictionary<int, double> NormalizareCornellSmart(Dictionary<int, int> VectorRar)
         {
             Dictionary<int, double> normCornellSmart = new Dictionary<int, double>();
             foreach (var item in VectorRar)
@@ -423,11 +422,11 @@ namespace ExtragereaTrasaturilor
                 {
                     normCornellSmart.Add(item.Key, 0);
                 }
-                else 
+                else
                 {
                     double TF = 0;
                     TF = 1 + Math.Log10(1 + Math.Log10(item.Value));
-                    if(TF > 2)
+                    if (TF > 2)
                     {
                         TF = 2;
                     }
@@ -503,7 +502,7 @@ namespace ExtragereaTrasaturilor
 
         }
 
-        public Dictionary<int,float> NormalizareSuma1(Dictionary<int, int> VectorRar)
+        public Dictionary<int, float> NormalizareSuma1(Dictionary<int, int> VectorRar)
         {
             Dictionary<int, float> VectorRarNormalizat = new Dictionary<int, float>();
             int suma1 = 0;
@@ -511,7 +510,7 @@ namespace ExtragereaTrasaturilor
             {
                 suma1 += elemvector.Value;
             }
-            foreach(var vector in VectorRar)
+            foreach (var vector in VectorRar)
             {
                 VectorRarNormalizat.Add(vector.Key, vector.Value / suma1);
             }
@@ -561,7 +560,7 @@ namespace ExtragereaTrasaturilor
                 if (CstInformational.ElementAt(i) < 0.5)
                 {
                     indexCuvSubPrag.Add(i);
-                   
+
                 }
             }
             for (int i = 0; i < indexCuvSubPrag.Count; i++)
