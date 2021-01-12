@@ -267,16 +267,18 @@ namespace ExtragereaTrasaturilor
         {
             double elemente = 0.0;
             double entropie = 0;
+            double resultEntropie = 0.0;
 
 
             foreach (var item in aparitieClase)
             {
                 elemente = item.Value / (double)totalEsantione;
-                entropie = entropie - elemente * (double)Math.Log(2, elemente);
-
+                entropie = elemente * (double)Math.Log(elemente, 2);
+                resultEntropie -= entropie;
             }
-            return entropie;
+            return resultEntropie;
         }
+
 
         public static double EntropieGlobala(List<Article> articole)
         {
@@ -617,5 +619,7 @@ namespace ExtragereaTrasaturilor
         {
 
         }
-    }
+
+		
+	}
 }
