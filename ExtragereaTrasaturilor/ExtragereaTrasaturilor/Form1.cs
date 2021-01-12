@@ -503,7 +503,20 @@ namespace ExtragereaTrasaturilor
 
         }
 
-
+        public Dictionary<int,float> NormalizareSuma1(Dictionary<int, int> VectorRar)
+        {
+            Dictionary<int, float> VectorRarNormalizat = new Dictionary<int, float>();
+            int suma1 = 0;
+            foreach (var elemvector in VectorRar)
+            {
+                suma1 += elemvector.Value;
+            }
+            foreach(var vector in VectorRar)
+            {
+                VectorRarNormalizat.Add(vector.Key, vector.Value / suma1);
+            }
+            return VectorRarNormalizat;
+        }
 
         private void btnExtTras_Click(object sender, EventArgs e)
         {
