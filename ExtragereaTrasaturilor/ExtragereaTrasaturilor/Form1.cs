@@ -402,7 +402,28 @@ namespace ExtragereaTrasaturilor
             return rezDE;
         }
 
-        
+
+        public Dictionary<int, int> NormalizareBinara(Dictionary<int, int> vectorRar)
+        {
+            Dictionary<int, int> normBinara = new Dictionary<int, int>();
+
+            foreach (var item in vectorRar)
+            {
+                if (item.Value > 0)
+                {
+                    normBinara.Add(item.Key, 1);
+                }
+                else if (item.Value == 1)
+                {
+                    normBinara.Add(item.Key, 0);
+                }
+
+            }
+
+            return normBinara;
+        }
+
+
 
         private void btnExtTras_Click(object sender, EventArgs e)
         {
