@@ -401,7 +401,72 @@ namespace ExtragereaTrasaturilor
             rezDE = Math.Sqrt(sumaelem);
             return rezDE;
         }
+        public double DistantaManhatan(Dictionary<int, int> VectorRar1, Dictionary<int, int> VectorRar2, int n)
+        {
+            double rezDM;
+            double sumaelem = 0.0;
+            for (int i = 0; i < n; i++)
+            {
+               
+                sumaelem += Math.Abs(VectorRar1.ElementAt(i).Key - VectorRar2.ElementAt(i).Key);
+            }
+            rezDM = sumaelem;
+            return rezDM;
+        }
 
+        public Dictionary<int, double> NormalizareCornellSmart(Dictionary<int, int> VectorRar )
+        {
+            Dictionary<int, double> normCornellSmart = new Dictionary<int, double>();
+            foreach (var item in VectorRar)
+            {
+                if (item.Value == 0)
+                {
+                    normCornellSmart.Add(item.Key, 0);
+                }
+                else 
+                {
+                    double TF = 0;
+                    TF = 1 + Math.Log10(1 + Math.Log10(item.Value));
+                    if(TF > 2)
+                    {
+                        TF = 2;
+                    }
+                    normCornellSmart.Add(item.Key, TF);
+                }
+            }
+            return normCornellSmart;
+
+        }
+        /// <summary>
+        /// NormalizareCornellSmart returneaza int 
+        /// </summary>
+        /// <param name="VectorRar"></param>
+        /// <returns></returns>
+     /*   public Dictionary<int, int> NormalizareCornellSmart(Dictionary<int, int> VectorRar)
+        {
+            Dictionary<int, int> normCornellSmart = new Dictionary<int, int>();
+            foreach (var item in VectorRar)
+            {
+                if (item.Value == 0)
+                {
+                    normCornellSmart.Add(item.Key, 0);
+                }
+                else
+                {
+                    double TF = 0;
+                    TF = 1 + Math.Log10(1 + Math.Log10(item.Value));
+                    if(TF > 2)
+                    {
+                        TF = 2;
+                    }
+
+                    normCornellSmart.Add(item.Key,  Convert.ToInt32( TF));
+                }
+            }
+            return normCornellSmart;
+
+        }
+     */
 
         public Dictionary<int, int> NormalizareBinara(Dictionary<int, int> vectorRar)
         {
@@ -414,6 +479,7 @@ namespace ExtragereaTrasaturilor
                     normBinara.Add(item.Key, 1);
                 }
                 else if (item.Value == 1)
+
                 {
                     normBinara.Add(item.Key, 0);
                 }
