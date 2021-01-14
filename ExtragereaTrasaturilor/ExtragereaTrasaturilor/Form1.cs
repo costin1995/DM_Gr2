@@ -27,17 +27,15 @@ namespace ExtragereaTrasaturilor
         double rezEntropieCuvantExistent = 0.0;
         Dictionary<string, int> EntropiaCuvantCareNuExista = new Dictionary<string, int>();
         double rezEntropieCuvantCareNuExista = 0.0;
-
-        public static int totalEsantione;
+        
         List<double> CstInformational = new List<double>();
-        public static double entropieGlobala;
 
 
         public Form1()
         {
             InitializeComponent();
-            //string Location = (@"E:\Facultate\Anul_4_sem_1\Data Mining\Laborator\Laborator\ExtragereaTrasaturilor\Reuters_34");
-            //CreateVectors(ListToReturn( Location));
+            string Location = ("..\\..\\..\\Reuters_34");
+            CreateVectors(ListToReturn( Location));
 
         }
 
@@ -91,7 +89,6 @@ namespace ExtragereaTrasaturilor
                 }
             }
 
-            totalEsantione = listCodes.Count;
             return listCodes;
 
         }
@@ -263,7 +260,7 @@ namespace ExtragereaTrasaturilor
             }
         }
 
-        public static double Entropie(Dictionary<string, int> aparitieClase, double totalEsantione)
+        public static double Entropie(Dictionary<string, int> aparitieClase, double totalArticole)
         {
             double elemente = 0.0;
             double entropie = 0;
@@ -272,7 +269,7 @@ namespace ExtragereaTrasaturilor
 
             foreach (var item in aparitieClase)
             {
-                elemente = item.Value / (double)totalEsantione;
+                elemente = item.Value / (double)totalArticole;
                 entropie = elemente * (double)Math.Log(elemente, 2);
                 resultEntropie -= entropie;
             }
@@ -282,7 +279,7 @@ namespace ExtragereaTrasaturilor
 
         public static double EntropieGlobala(List<Article> articole)
         {
-            entropieGlobala = 0;
+            double entropieGlobala = 0;
             Dictionary<string, int> repartitieClase = new Dictionary<string, int>();
             foreach (Article articol in articole)
             {
@@ -377,15 +374,33 @@ namespace ExtragereaTrasaturilor
 
         public void CastigInformational()
         {
+            Dictionary<int, int> Sv = new Dictionary<int, int>();
             double castigInform = 0.0;
-            int totalValori = listToReturn.Count;
+            int totalValori = VectorGlobal.Count;
+            var Entropie = EntropieGlobala(listToReturn);
 
+            foreach (var dic in ListVectorRar) 
+            {
+                foreach (var item in dic) 
+                {
+                    if (Sv.ContainsKey(item.Key))
+                    {
+                        Sv[item.Key] += item.Value;
+                    }
+                    else
+                    {
+                        Sv.Add(item.Key,item.Value);
+                    }
+                }
+            }
+
+            
             for (int i = 0; i < VectorGlobal.Count; i++)
             {
-                int aparitieValoare = EntropiaCuvantExistent[VectorGlobal.ElementAt(i)];
-                castigInform = EntropieGlobala(listToReturn) - (aparitieValoare / totalValori) * EntropieCuvantExistent(listToReturn, aparitieValoare) - (aparitieValoare / totalValori) * EntropieCuvantCareNuExista(listToReturn, aparitieValoare);
+                int diferentaValori = totalValori - Sv[i];
+                //castigInform = Entropie - Sv[i] / totalValori * //listaaparitiecuvant -  diferentaValori/ totalValori * //lista cuvant neexistent;
                 CstInformational.Add(castigInform);
-
+              
             }
 
 
@@ -479,7 +494,7 @@ namespace ExtragereaTrasaturilor
                 {
                     normBinara.Add(item.Key, 1);
                 }
-                else if (item.Value == 1)
+                else if (item.Value == 0)
 
                 {
                     normBinara.Add(item.Key, 0);
@@ -609,17 +624,42 @@ namespace ExtragereaTrasaturilor
                 }
 
             }
-
-
-
-
         }
 
-        private void Form1_Load(object sender, EventArgs e)
+        
+        public void ImpartireaSetuluiDeDate() 
         {
+            
 
         }
 
-		
+
+		private void btnSelect_Click(object sender, EventArgs e)
+		{
+
+            foreach (var vectorRar in ListVectorRar)
+            {
+                if (radioBtbBinara.Checked)
+                {
+                    NormalizareBinara(vectorRar);
+                }
+
+                if (radioBtnNominala.Checked)
+                {
+                    NormalizareNominala(vectorRar);
+                }
+
+                if (radioBtnSuma1.Checked)
+                {
+                    NormalizareSuma1(vectorRar);
+                }
+
+                if (radioBtnCornellSmart.Checked)
+                {
+                    NormalizareCornellSmart(vectorRar);
+                }
+
+            }
+        }
 	}
 }
