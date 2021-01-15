@@ -29,6 +29,8 @@ namespace ExtragereaTrasaturilor
         double rezEntropieCuvantCareNuExista = 0.0;
         
         List<double> CstInformational = new List<double>();
+        List<Article> listTraining = new List<Article>();
+        List<Article> listTesting = new List<Article>();
 
 
         public Form1()
@@ -394,13 +396,15 @@ namespace ExtragereaTrasaturilor
                 }
             }
 
-            
+
             for (int i = 0; i < VectorGlobal.Count; i++)
             {
-                int diferentaValori = totalValori - Sv[i];
-                //castigInform = Entropie - Sv[i] / totalValori * //listaaparitiecuvant -  diferentaValori/ totalValori * //lista cuvant neexistent;
+                //foreach (var index in Sv)
+                //{
+                //int diferentaValori = totalValori - index.Value;
+                //castigInform = Entropie - index.Value / totalValori * rezEntropieCuvantExistent.ElementAt(i) - diferentaValori / totalValori * rezEntropieCuvantCareNuExista.ElementAt(i);
                 CstInformational.Add(castigInform);
-              
+                // }
             }
 
 
@@ -629,8 +633,18 @@ namespace ExtragereaTrasaturilor
         
         public void ImpartireaSetuluiDeDate() 
         {
-            
+            foreach (var article in listToReturn)
+            {
+                if (article.Data_Set == "Training")
+                {
+                    listTraining.Add(article);
+                }
+                else if (article.Data_Set == "Testing")
+                {
+                    listTesting.Add(article);
+                }
 
+            }
         }
 
 
