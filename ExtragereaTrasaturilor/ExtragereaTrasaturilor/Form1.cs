@@ -26,8 +26,7 @@ namespace ExtragereaTrasaturilor
         Dictionary<string, int> EntropiaCuvantExistent = new Dictionary<string, int>();
         List<double> rezEntropieCuvantExistent = new List<double>();
         Dictionary<string, int> EntropiaCuvantCareNuExista = new Dictionary<string, int>();
-        double rezEntropieCuvantCareNuExista = 0.0;
-        
+        List<double> rezEntropieCuvantCareNuExista = new List<double>();
         List<double> CstInformational = new List<double>();
         List<Article> listTraining = new List<Article>();
         List<Article> listTesting = new List<Article>();
@@ -135,13 +134,22 @@ namespace ExtragereaTrasaturilor
         }
         static string[] GetWords(string input)
         {
+            List<string> listWords = new List<string>();
             MatchCollection matches = Regex.Matches(input, @"\b[\w']*\b");
 
             var words = from m in matches.Cast<Match>()
                         where !string.IsNullOrEmpty(m.Value)
                         select TrimSuffix(m.Value);
 
-            return words.ToArray();
+            foreach (var word in words)
+            {
+                if (word.Length > 1)
+                {
+                    listWords.Add(word);
+                }
+            }
+
+            return listWords.ToArray();
         }
 
         public void ListaWords()
@@ -238,8 +246,14 @@ namespace ExtragereaTrasaturilor
                 }
 
             }
-
-            return VectorRar;
+            Dictionary<int, int> dictToReturn = new Dictionary<int, int>();
+            List<int> sortareDict = VectorRar.Keys.ToList();
+            sortareDict.Sort();
+            foreach (var key in sortareDict)
+            {
+                dictToReturn.Add(key, VectorRar[key]);
+            }
+            return dictToReturn;
 
         }
 
@@ -253,7 +267,7 @@ namespace ExtragereaTrasaturilor
                 {
                     string root = string.Empty;
                     root = PorterStream.StemWord(word);
-                    if (!VectorGlobal.Contains(word))
+                    if (!VectorGlobal.Contains(root))
                     {
                         VectorGlobal.Add(root);
                     }
@@ -333,46 +347,44 @@ namespace ExtragereaTrasaturilor
             return rezEntropieCuvantExistent;
 
         }
-        public double EntropieCuvantCareNuExista(List<Article> listaArticole, int NrCuvant)
+        public List<double> EntropieCuvantNeexistent()
         {
-            int nrArticoleNrCuvant = 0;
-            foreach (var VectorRar in ListVectorRar)
+            foreach (var cuvant in VectorGlobal) //string urile cu cuvinte
             {
-                bool ok = true;
-                foreach (var b in VectorRar)
+                Dictionary<string, int> DictRepartitieClasa = new Dictionary<string, int>();
+                foreach (var vectorRar in ListVectorRar)
                 {
-                    if (b.Key == NrCuvant)
+                    if (!vectorRar.ContainsKey(VectorGlobal.IndexOf(cuvant)))
                     {
-                        ok = false;
-                    }
-                }
-                if (ok == true)
-                {
-                    nrArticoleNrCuvant++;
-                    foreach (var c in listaArticole)
-                    {
-                        if (listaArticole.IndexOf(c) == ListVectorRar.IndexOf(VectorRar))
+                        string clasa = listToReturn.ElementAt(ListVectorRar.IndexOf(vectorRar)).ClassCodes.First();
+
+                        if (DictRepartitieClasa.ContainsKey(clasa))
                         {
-                            foreach (var d in c.ClassCodes)
-                            {
-                                if (!EntropiaCuvantCareNuExista.ContainsKey(d))
-                                {
-                                    EntropiaCuvantCareNuExista.Add(d, 1);
-                                }
-                                else
-                                {
-                                    EntropiaCuvantCareNuExista[d]++;
-                                }
-                            }
+                            DictRepartitieClasa[clasa]++;
                         }
+
+                        else
+                        {
+                            DictRepartitieClasa.Add(clasa, 1);
+                        }
+
                     }
+
+
                 }
+                int frecventaCuvant = 0;
+                foreach (var aparitieClasa in DictRepartitieClasa)
+                {
+                    frecventaCuvant += aparitieClasa.Value;
+                }
+                rezEntropieCuvantCareNuExista.Add(Entropie(DictRepartitieClasa, frecventaCuvant));
 
             }
-            rezEntropieCuvantCareNuExista = Entropie(EntropiaCuvantCareNuExista, nrArticoleNrCuvant);
-            return rezEntropieCuvantCareNuExista;
-        }
 
+
+            return rezEntropieCuvantCareNuExista;
+
+        }
 
         public void CastigInformational()
         {
@@ -433,14 +445,26 @@ namespace ExtragereaTrasaturilor
             rezDE = Math.Sqrt(sumaelem);
             return rezDE;
         }
-        public double DistantaManhatan(Dictionary<int, int> VectorRar1, Dictionary<int, int> VectorRar2, int n)
+        public double DistantaManhatan(Dictionary<int, double> VectorRar1, Dictionary<int, double> VectorRar2, int n)
         {
             double rezDM;
             double sumaelem = 0.0;
             for (int i = 0; i < n; i++)
             {
 
-                sumaelem += Math.Abs(VectorRar1.ElementAt(i).Key - VectorRar2.ElementAt(i).Key);
+                if (VectorRar1.ContainsKey(i) && VectorRar2.ContainsKey(i))
+                {
+                    sumaelem += Math.Abs(VectorRar1[i] - VectorRar2[i]);
+                }
+                else if (VectorRar1.ContainsKey(i) && !VectorRar2.ContainsKey(i))
+                {
+                    sumaelem += Math.Abs(VectorRar1[i]);
+                }
+
+                else if (!VectorRar1.ContainsKey(i) && VectorRar2.ContainsKey(i))
+                {
+                    sumaelem += Math.Abs(VectorRar2[i]);
+                }
             }
             rezDM = sumaelem;
             return rezDM;
@@ -469,37 +493,7 @@ namespace ExtragereaTrasaturilor
             return normCornellSmart;
 
         }
-        /// <summary>
-        /// NormalizareCornellSmart returneaza int 
-        /// </summary>
-        /// <param name="VectorRar"></param>
-        /// <returns></returns>
-     /*   public Dictionary<int, int> NormalizareCornellSmart(Dictionary<int, int> VectorRar)
-        {
-            Dictionary<int, int> normCornellSmart = new Dictionary<int, int>();
-            foreach (var item in VectorRar)
-            {
-                if (item.Value == 0)
-                {
-                    normCornellSmart.Add(item.Key, 0);
-                }
-                else
-                {
-                    double TF = 0;
-                    TF = 1 + Math.Log10(1 + Math.Log10(item.Value));
-                    if(TF > 2)
-                    {
-                        TF = 2;
-                    }
-
-                    normCornellSmart.Add(item.Key,  Convert.ToInt32( TF));
-                }
-            }
-            return normCornellSmart;
-
-        }
-     */
-
+        
         public Dictionary<int, int> NormalizareBinara(Dictionary<int, int> vectorRar)
         {
             Dictionary<int, int> normBinara = new Dictionary<int, int>();
@@ -535,9 +529,9 @@ namespace ExtragereaTrasaturilor
 
         }
 
-        public Dictionary<int, float> NormalizareSuma1(Dictionary<int, int> VectorRar)
+        public Dictionary<int, double> NormalizareSuma1(Dictionary<int, int> VectorRar)
         {
-            Dictionary<int, float> VectorRarNormalizat = new Dictionary<int, float>();
+            Dictionary<int, double> VectorRarNormalizat = new Dictionary<int, double>();
             int suma1 = 0;
             foreach (var elemvector in VectorRar)
             {
