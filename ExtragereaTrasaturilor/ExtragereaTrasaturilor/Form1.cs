@@ -28,15 +28,15 @@ namespace ExtragereaTrasaturilor
         Dictionary<string, int> EntropiaCuvantCareNuExista = new Dictionary<string, int>();
         List<double> rezEntropieCuvantCareNuExista = new List<double>();
         List<double> CstInformational = new List<double>();
-        List<Article> listTraining = new List<Article>();
-        List<Article> listTesting = new List<Article>();
-
+        List<Dictionary<int, double>> listTraining = new List<Dictionary<int, double>>();
+        List<Dictionary<int, double>> listTesting = new List<Dictionary<int, double>>();
+        List<Dictionary<int, double>> ListVectorRarNormalizat = new List<Dictionary<int, double>>();
 
         public Form1()
         {
             InitializeComponent();
             string Location = ("..\\..\\..\\Reuters_34");
-            CreateVectors(ListToReturn( Location));
+            CreateVectors(ListToReturn(Location));
 
         }
 
@@ -386,41 +386,45 @@ namespace ExtragereaTrasaturilor
 
         }
 
+
         public void CastigInformational()
         {
-            Dictionary<int, int> Sv = new Dictionary<int, int>();
+            Dictionary<int, int> dictAparitie = new Dictionary<int, int>();
+            Dictionary<int, int> dictNonAparitie = new Dictionary<int, int>();
             double castigInform = 0.0;
-            int totalValori = VectorGlobal.Count;
+            int totalValori = listToReturn.Count;
             var Entropie = EntropieGlobala(listToReturn);
 
-            foreach (var dic in ListVectorRar) 
+
+            foreach (var cuvant in VectorGlobal)
             {
-                foreach (var item in dic) 
+                dictAparitie.Add(VectorGlobal.IndexOf(cuvant), 0);
+                dictNonAparitie.Add(VectorGlobal.IndexOf(cuvant), 0);
+                foreach (var dic in ListVectorRar)
                 {
-                    if (Sv.ContainsKey(item.Key))
+                    if (dic.ContainsKey(VectorGlobal.IndexOf(cuvant)))
                     {
-                        Sv[item.Key] += item.Value;
+                        dictAparitie[VectorGlobal.IndexOf(cuvant)]++;
+
                     }
                     else
                     {
-                        Sv.Add(item.Key,item.Value);
+                        dictNonAparitie[VectorGlobal.IndexOf(cuvant)]++;
                     }
                 }
+
             }
 
-
-            for (int i = 0; i < VectorGlobal.Count; i++)
+            foreach (var cuvant in VectorGlobal)
             {
-                //foreach (var index in Sv)
-                //{
-                //int diferentaValori = totalValori - index.Value;
-                //castigInform = Entropie - index.Value / totalValori * rezEntropieCuvantExistent.ElementAt(i) - diferentaValori / totalValori * rezEntropieCuvantCareNuExista.ElementAt(i);
+                int index = VectorGlobal.IndexOf(cuvant);
+                int totalArticole = listToReturn.Count;
+                castigInform = Entropie - (double)((double)dictAparitie.ElementAt(index).Value / (double)totalArticole) * (double)rezEntropieCuvantExistent.ElementAt(index) - ((double)dictNonAparitie.ElementAt(index).Value / (double)totalArticole) * (double)rezEntropieCuvantCareNuExista.ElementAt(index);
                 CstInformational.Add(castigInform);
-                // }
             }
-
 
         }
+
 
         public double DistantaEuclidiana(Dictionary<int, double> VectorRar1, Dictionary<int, double> VectorRar2, int n/*numarul de trasaturi caracteristice*/)
         {
@@ -493,10 +497,10 @@ namespace ExtragereaTrasaturilor
             return normCornellSmart;
 
         }
-        
-        public Dictionary<int, int> NormalizareBinara(Dictionary<int, int> vectorRar)
+
+        public Dictionary<int, double> NormalizareBinara(Dictionary<int, int> vectorRar)
         {
-            Dictionary<int, int> normBinara = new Dictionary<int, int>();
+            Dictionary<int, double> normBinara = new Dictionary<int, double>();
 
             foreach (var item in vectorRar)
             {
@@ -516,10 +520,10 @@ namespace ExtragereaTrasaturilor
         }
 
 
-        public Dictionary<int, float> NormalizareNominala(Dictionary<int, int> vectorRar)
+        public Dictionary<int, double> NormalizareNominala(Dictionary<int, int> vectorRar)
         {
             float maxValueDict = vectorRar.Values.Max();
-            Dictionary<int, float> vectorRarNormalizat = new Dictionary<int, float>();
+            Dictionary<int, double> vectorRarNormalizat = new Dictionary<int, double>();
             foreach (var value in vectorRar)
             {
                 vectorRarNormalizat.Add(value.Key, value.Value / maxValueDict);
@@ -547,7 +551,7 @@ namespace ExtragereaTrasaturilor
         private void btnExtTras_Click(object sender, EventArgs e)
         {
             ListToReturn("..\\..\\..\\Reuters_34");
-            CreateVectors(listToReturn); 
+            CreateVectors(listToReturn);
             string Filename = "..\\..\\..\\Input\\rezultat.txt";
             StreamWriter sw = new StreamWriter(Filename);
             foreach (var indexListVectorRar in ListVectorRar)
@@ -636,50 +640,53 @@ namespace ExtragereaTrasaturilor
             }
         }
 
-        
-        public void ImpartireaSetuluiDeDate() 
+
+        public void ImpartireaSetuluiDeDate()
         {
-            foreach (var article in listToReturn)
+
+            foreach (var articol in listToReturn)
             {
-                if (article.Data_Set == "Training")
+                int index = listToReturn.IndexOf(articol);
+                if (articol.Data_Set == "Training")
                 {
-                    listTraining.Add(article);
+                    listTraining.Add(ListVectorRarNormalizat.ElementAt(index));
                 }
-                else if (article.Data_Set == "Testing")
+                else if (articol.Data_Set == "Testing")
                 {
-                    listTesting.Add(article);
+                    listTesting.Add(ListVectorRarNormalizat.ElementAt(index));
                 }
 
             }
+
         }
 
 
-		private void btnSelect_Click(object sender, EventArgs e)
-		{
-
+        private void btnSelect_Click(object sender, EventArgs e)
+        {
             foreach (var vectorRar in ListVectorRar)
             {
+
                 if (radioBtbBinara.Checked)
                 {
-                    NormalizareBinara(vectorRar);
+                    ListVectorRarNormalizat.Add(NormalizareBinara(vectorRar));
                 }
 
                 if (radioBtnNominala.Checked)
                 {
-                    NormalizareNominala(vectorRar);
+                    ListVectorRarNormalizat.Add(NormalizareNominala(vectorRar));
                 }
 
                 if (radioBtnSuma1.Checked)
                 {
-                    NormalizareSuma1(vectorRar);
+                    ListVectorRarNormalizat.Add(NormalizareSuma1(vectorRar));
                 }
 
                 if (radioBtnCornellSmart.Checked)
                 {
-                    NormalizareCornellSmart(vectorRar);
+                    ListVectorRarNormalizat.Add(NormalizareCornellSmart(vectorRar));
                 }
 
             }
         }
-	}
+    }
 }
