@@ -18,7 +18,7 @@ namespace ExtragereaTrasaturilor
     {
         XmlDocument document = new XmlDocument();
 
-        List<int> indexCuvSubPrag = new List<int>();
+        List<int> indexCuvPestePrag = new List<int>();
         List<string> VectorGlobal = new List<string>();
         List<string> StopWords = new List<string>();
         List<Dictionary<int, int>> ListVectorRar = new List<Dictionary<int, int>>();
@@ -588,31 +588,40 @@ namespace ExtragereaTrasaturilor
             float prag = (float)pragForm.Value;
             for (int i = 0; i < CstInformational.Count; i++)
             {
-                if (CstInformational.ElementAt(i) < 0.5)
+                if (CstInformational.ElementAt(i) > prag)
                 {
-                    indexCuvSubPrag.Add(i);
+                    indexCuvPestePrag.Add(i);
 
                 }
             }
-            for (int i = 0; i < indexCuvSubPrag.Count; i++)
+            List<double> newCastigInformational = new List<double>();
+            List<string> newVectorGlobal = new List<string>();
+            for (int i = 0; i < indexCuvPestePrag.Count; i++)
             {
-                CstInformational.RemoveAt(indexCuvSubPrag[i]);
-                VectorGlobal.RemoveAt(indexCuvSubPrag[i]);
-            }
 
+                newCastigInformational.Add(CstInformational.ElementAt(indexCuvPestePrag.ElementAt(i)));
+                newVectorGlobal.Add(VectorGlobal.ElementAt(indexCuvPestePrag.ElementAt(i)));
+            }
+            CstInformational = newCastigInformational;
+            VectorGlobal = newVectorGlobal;
+
+            List<Dictionary<int, int>> newListVectorRar = new List<Dictionary<int, int>>();
             foreach (var vectorRar in ListVectorRar)
             {
+                Dictionary<int, int> newVectorRar = new Dictionary<int, int>();
 
-                for (int i = 0; i < indexCuvSubPrag.Count; i++)
+                for (int i = 0; i < indexCuvPestePrag.Count; i++)
                 {
-                    if (vectorRar.ContainsKey(indexCuvSubPrag[i]))
+                    if (vectorRar.ContainsKey(indexCuvPestePrag[i]))
                     {
-                        vectorRar.Remove(indexCuvSubPrag[i]);
+                        newVectorRar.Add(indexCuvPestePrag[i], vectorRar[indexCuvPestePrag[i]]);
+
                     }
 
                 }
+                newListVectorRar.Add(newVectorRar);
             }
-
+            ListVectorRar = newListVectorRar;
             string path = @"..\..\..\SelectiaTrasaturilor.txt"; // path to file
             using (FileStream fs = File.Create(path))
             {
@@ -633,13 +642,20 @@ namespace ExtragereaTrasaturilor
                     }
                     AddText(fs, "# ");
                     AddText(fs, listToReturn.ElementAt(j).ClassCodes.First());
+                    if (j < 7)
+                    {
+                        AddText(fs, "  # testing");
+                    }
+                    else
+                    {
+                        AddText(fs, "  # training");
+                    }
                     AddText(fs, "\r\n");
                     j++;
                 }
 
             }
         }
-
 
         public void ImpartireaSetuluiDeDate()
         {
@@ -687,6 +703,84 @@ namespace ExtragereaTrasaturilor
                 }
 
             }
+        }
+
+
+        public Dictionary<int, string> KNN()
+        {
+            int k = (int)kVal.Value;
+            Dictionary<int, Dictionary<int, double>> distanta = new Dictionary<int, Dictionary<int, double>>();
+            Dictionary<int, string> listaArticoleClasaPredictionata = new Dictionary<int, string>();
+
+            foreach (var testing in listTesting)
+            {
+                Dictionary<int, double> dictDistanta = new Dictionary<int, double>();
+                int indexTesting = listTesting.IndexOf(testing);
+                foreach (var training in listTraining)
+                {
+                    int indexTraining = listTraining.IndexOf(training);
+                    if (RBEuclidiana.Checked)
+                    {
+                        dictDistanta[indexTraining] = (DistantaEuclidiana(testing, training, VectorGlobal.Count));
+                    }
+                    if (RBManhattan.Checked)
+                    {
+                        dictDistanta[indexTraining] = (DistantaManhatan(testing, training, VectorGlobal.Count));
+                    }
+                }
+                var ordered = dictDistanta.OrderBy(x => x.Value).ToDictionary(x => x.Key, x => x.Value);
+                distanta[indexTesting] = ordered.Take(k).ToDictionary(x => x.Key, x => x.Value);
+            }
+            int indexTest = 0;
+            foreach (var dictDistanta in distanta)
+            {
+                List<string> clase = new List<string>();
+                foreach (var elem in dictDistanta.Value)
+                {
+                    clase.Add(listToReturn.ElementAt(elem.Key).ClassCodes.First());
+                }
+                listaArticoleClasaPredictionata.Add(indexTest, MostSignificantClass(clase));
+                indexTest++;
+            }
+
+            return listaArticoleClasaPredictionata;
+        }
+
+
+        public string MostSignificantClass(List<string> listClases)
+        {
+            Dictionary<string, int> freqClasses = new Dictionary<string, int>();
+
+            foreach (string cls in listClases)
+            {
+                if (freqClasses.ContainsKey(cls))
+                {
+                    freqClasses[cls]++;
+                }
+                else
+                {
+                    freqClasses.Add(cls, 1);
+                }
+            }
+            return freqClasses.OrderByDescending(x => x.Value).First().Key;
+        }
+
+
+        private void knnBtn_Click(object sender, EventArgs e)
+        {
+            KNN();
+        }
+
+        private void castigInformatioalBtn_Click(object sender, EventArgs e)
+        {
+            EntropieCuvantExistent();
+            EntropieCuvantNeexistent();
+            CastigInformational();
+        }
+
+        private void ImpartireDateBtn_Click(object sender, EventArgs e)
+        {
+            ImpartireaSetuluiDeDate();
         }
     }
 }
