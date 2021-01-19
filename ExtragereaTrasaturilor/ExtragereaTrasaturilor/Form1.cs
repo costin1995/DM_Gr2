@@ -31,7 +31,7 @@ namespace ExtragereaTrasaturilor
         List<Dictionary<int, double>> listTraining = new List<Dictionary<int, double>>();
         List<Dictionary<int, double>> listTesting = new List<Dictionary<int, double>>();
         List<Dictionary<int, double>> ListVectorRarNormalizat = new List<Dictionary<int, double>>();
-
+        Dictionary<int, string> listaArticoleClasaPredictionata = new Dictionary<int, string>();
         public Form1()
         {
             InitializeComponent();
@@ -710,7 +710,6 @@ namespace ExtragereaTrasaturilor
         {
             int k = (int)kVal.Value;
             Dictionary<int, Dictionary<int, double>> distanta = new Dictionary<int, Dictionary<int, double>>();
-            Dictionary<int, string> listaArticoleClasaPredictionata = new Dictionary<int, string>();
 
             foreach (var testing in listTesting)
             {
@@ -781,6 +780,41 @@ namespace ExtragereaTrasaturilor
         private void ImpartireDateBtn_Click(object sender, EventArgs e)
         {
             ImpartireaSetuluiDeDate();
+        }
+
+        private void btnEvKNN_Click(object sender, EventArgs e)
+        {
+            Dictionary<string, int> frecvclase = new Dictionary<string, int>();
+            foreach(var a in listaArticoleClasaPredictionata)
+            {
+                if (!frecvclase.ContainsKey(a.Value))
+                {
+                    frecvclase.Add(a.Value, 1);
+                }
+                else
+                {
+                    frecvclase[a.Value]++;
+                }
+            }
+            frecvclase.OrderBy(x=>x.Value).ToDictionary(x=>x.Key,x=>x.Value);
+            float AcurateteAlg = 0;
+            float PrecizieAlg = 0;
+            foreach(var a in listToReturn)
+            {
+                if (a.Data_Set == "Testing")
+                {
+                    string clasa = listToReturn.ElementAt(listToReturn.IndexOf(a)).ClassCodes.First();
+                    if (frecvclase.ElementAt(0).Key == clasa)
+                    {
+                        AcurateteAlg++;
+                        PrecizieAlg++;
+                    }
+                }
+            }
+            AcurateteAlg = AcurateteAlg / listaArticoleClasaPredictionata.Count;
+            PrecizieAlg = PrecizieAlg / frecvclase.ElementAt(0).Value;
+            textBox1.Text += "Acuratetea algoritmului este: " + String.Format("{0:0.00}", AcurateteAlg * 100) + "%";
+            textBox1.Text += "\r\nPrecizia algoritmului este: " + String.Format("{0:0.00}", PrecizieAlg * 100) + "%";
         }
     }
 }
