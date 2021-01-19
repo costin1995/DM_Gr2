@@ -24,7 +24,7 @@ namespace ExtragereaTrasaturilor
         List<Dictionary<int, int>> ListVectorRar = new List<Dictionary<int, int>>();
         List<Article> listToReturn = new List<Article>();
         Dictionary<string, int> EntropiaCuvantExistent = new Dictionary<string, int>();
-        double rezEntropieCuvantExistent = 0.0;
+        List<double> rezEntropieCuvantExistent = new List<double>();
         Dictionary<string, int> EntropiaCuvantCareNuExista = new Dictionary<string, int>();
         double rezEntropieCuvantCareNuExista = 0.0;
         
@@ -300,38 +300,38 @@ namespace ExtragereaTrasaturilor
             return entropieGlobala;
         }
 
-        public double EntropieCuvantExistent(List<Article> listaArticole, int NrCuvant/*numarul corespunzator cuvantului pentru care se calculeaza entropia*/)
+        public List<double> EntropieCuvantExistent()
         {
-            int nrArticoleNrCuvant = 0;
-            foreach (var a in ListVectorRar)
+            foreach (var cuvant in VectorGlobal) //string urile cu cuvinte
             {
-                foreach (var b in a)
+                Dictionary<string, int> DictRepartitieClasa = new Dictionary<string, int>();
+                foreach (var vectorRar in ListVectorRar)
                 {
-                    if (b.Key == NrCuvant)
+                    if (vectorRar.ContainsKey(VectorGlobal.IndexOf(cuvant)))
                     {
-                        nrArticoleNrCuvant++;
-                        foreach (var c in listaArticole)
+                        string clasa = listToReturn.ElementAt(ListVectorRar.IndexOf(vectorRar)).ClassCodes.First();
+
+                        if (DictRepartitieClasa.ContainsKey(clasa))
                         {
-                            if (listaArticole.IndexOf(c) == ListVectorRar.IndexOf(a))
-                            {
-                                foreach (var d in c.ClassCodes)
-                                {
-                                    if (!EntropiaCuvantExistent.ContainsKey(d))
-                                    {
-                                        EntropiaCuvantExistent.Add(d, 1);
-                                    }
-                                    else
-                                    {
-                                        EntropiaCuvantExistent[d]++;
-                                    }
-                                }
-                            }
+                            DictRepartitieClasa[clasa]++;
                         }
+
+                        else
+                        {
+                            DictRepartitieClasa.Add(clasa, 1);
+                        }
+
                     }
+
                 }
+
+                rezEntropieCuvantExistent.Add(Entropie(DictRepartitieClasa, listToReturn.Count));
+
             }
-            rezEntropieCuvantExistent = Entropie(EntropiaCuvantExistent, nrArticoleNrCuvant);
+
+
             return rezEntropieCuvantExistent;
+
         }
         public double EntropieCuvantCareNuExista(List<Article> listaArticole, int NrCuvant)
         {
@@ -410,13 +410,25 @@ namespace ExtragereaTrasaturilor
 
         }
 
-        public double DistantaEuclidiana(Dictionary<int, int> VectorRar1, Dictionary<int, int> VectorRar2, int n/*numarul de trasaturi caracteristice*/)
+        public double DistantaEuclidiana(Dictionary<int, double> VectorRar1, Dictionary<int, double> VectorRar2, int n/*numarul de trasaturi caracteristice*/)
         {
             double rezDE;
             double sumaelem = 0.0;
             for (int i = 0; i < n; i++)
             {
-                sumaelem += Math.Pow(VectorRar1.ElementAt(i).Key - VectorRar2.ElementAt(i).Key, 2);
+                if (VectorRar1.ContainsKey(i) && VectorRar2.ContainsKey(i))
+                {
+                    sumaelem += Math.Pow(VectorRar1[i] - VectorRar2[i], 2);
+                }
+                else if (VectorRar1.ContainsKey(i) && !VectorRar2.ContainsKey(i))
+                {
+                    sumaelem += Math.Pow(VectorRar1[i], 2);
+                }
+
+                else if (!VectorRar1.ContainsKey(i) && VectorRar2.ContainsKey(i))
+                {
+                    sumaelem += Math.Pow(VectorRar2[i], 2);
+                }
             }
             rezDE = Math.Sqrt(sumaelem);
             return rezDE;
@@ -541,7 +553,7 @@ namespace ExtragereaTrasaturilor
         private void btnExtTras_Click(object sender, EventArgs e)
         {
             ListToReturn("..\\..\\..\\Reuters_34");
-            CreateVectors(listToReturn);
+            CreateVectors(listToReturn); 
             string Filename = "..\\..\\..\\Input\\rezultat.txt";
             StreamWriter sw = new StreamWriter(Filename);
             foreach (var indexListVectorRar in ListVectorRar)
